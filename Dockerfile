@@ -15,6 +15,8 @@ WORKDIR /data
 COPY ./package.json /data/
 RUN npm install
 
+VOLUME /data
+
 ## Release image
 FROM node:lts-slim
 
