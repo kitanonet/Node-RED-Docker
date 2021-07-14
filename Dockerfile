@@ -35,14 +35,23 @@ COPY ./flows_cred.json /data/
 COPY ./package.json /data/
 COPY --from=build /data/node_modules /data/node_modules
 
+RUN mkdir /data/customModules 
+COPY customModules /data/customModules
+
+
 USER 0
 
 RUN chgrp -R 0 /data \
   && chmod -R g=u /data
 
-USER 1000
+
 
 WORKDIR /data
+RUN npm install node-red-contrib-opcua
+RUN npm install ./customModules/collect-variables/
+RUN npm install ./customModules/select-variables/
+
+USER 1000
 
 ENV PORT 1880
 ENV NODE_ENV=production
