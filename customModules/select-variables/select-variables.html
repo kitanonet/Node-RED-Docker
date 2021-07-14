@@ -1,0 +1,442 @@
+<script type="text/html" data-template-name="select-variables">
+    <button type="button" class="red-ui-button" id="reloadButton">RELOAD</button>
+    <div class="form-row">
+        <label for="node-input-select"><i class="fa fa-calculator"></i> DB</label>
+        <select id="node-input-select" width="auto">
+            <option value=0 selected>Choose DB</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-select2"><i class="fa fa-calculator"></i> Struct</label>
+        <select id="node-input-select2" width="auto">
+            <option value=0 selected>Choose STRUCT</option>
+        </select>
+    </div>
+    <div class="form-row node-input-orderedList-row">
+        <label for="node-input-orderedList" style="font-weight: bolder">Selected Rules</label>
+        <ol id="node-input-orderedList"></ol>
+    </div>
+    <div class="form-row">
+        <input type="text" id="node-input-typedInputJSON">
+    </div>
+    <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('select-variables',{
+        category: 'custom',
+        color: '#a6bbcf',
+        defaults: {
+            select: {value:""},
+            select2: {value:""},
+            editableList: {value:{}},
+            typedInputJSON: {value:{}},
+            orderedList:{value:[]},
+        },
+        inputs:1,
+        outputs:4,
+        icon: "file.png",
+        label: function() {
+            //console.log(this.editableList.db)
+            return this.editableList.db||"select-variables";
+            //return Object.keys(this.editableList.rules)||"select-variables";
+        },
+        button: {
+            enabled: function() {
+                // return whether or not the button is enabled, based on the current
+                // configuration of the node
+                return !this.changed
+            },
+            visible: function() {
+                // return whether or not the button is visible, based on the current
+                // configuration of the node
+                return this.hasButton
+            },
+            onclick: function() { 
+                console.log("button clickkkkk");
+                console.log(this.editableList)
+            }
+        },
+        oneditprepare: function(){
+            //alert("Hello! I am preparing edit template!!");
+            
+            
+            console.log(this.editableList);
+            console.log(this.orderedList);
+
+            var defaultData=true
+            var selectedData=this.editableList;
+
+            if (Object.keys(selectedData).length === 0) {
+                console.log('empty object') 
+                //$("#reloadButton").click()
+            }else{
+                console.log('data exists')
+                defaultData=false
+                $list=$("#node-input-orderedList")
+                var rulesList=selectedData.rules
+                Object.keys(rulesList).forEach(key=>{
+                    var action=rulesList[key].action
+                    var text
+                    switch (action) {
+                        case 'READ':
+                            text=action+" "+key
+                            break;
+        
+                        case 'WRITE':
+                        case 'SET':
+                            text=action+" "+key+" : "+rulesList[key].value
+                            break;
+                    }	
+                    $list.append($("<li>").text(text))
+                })
+            }
+
+            var getData = new Promise((resolve,reject)=>{
+                $.get( "/getVariables", function( data ) {
+                    resolve(data)
+                })
+            });
+
+            var objectTree; 
+            var structObj;
+            var varObj;
+
+            var $select=$("#node-input-select")
+            var $select2=$("#node-input-select2")
+
+            $("#reloadButton").on('click',()=>{
+                getData.then((data)=>{
+                    objectTree=data;
+
+                    var objkeys=Object.keys(data)
+                    var val,selector
+
+                    //console.log(objkeys);
+                    
+                    $select.empty().append($('<option>').val(0).text("Select DB"))
+
+                    objkeys.forEach((key,index)=>{
+                    
+                        selector=index+1
+                        val=data[key]
+                        $option=$('<option>').val(selector).text(key)
+                        $select.append($option)
+
+                        $select.width("auto")
+                        //$("option",$select).width("auto")
+
+                        //console.log(selector+" "+key+" "+val)
+                    })
+
+                    alert( "Variables Loaded" );
+                    if(!defaultData){
+                        var db=selectedData['db']
+                        var struct=selectedData['struct']
+                        var rules=selectedData['rules']
+                        console.log(db+" "+struct)
+                        console.log(rules)
+                        selectOption($select,db,true)
+                        selectOption($select2,struct,true)
+                        setEditableListValues(selectedData)
+                        
+                    }
+                    
+                })
+            })
+
+            $("#reloadButton").click()
+
+            
+
+            
+            
+
+            $select.change(function() {
+                //alert( "Handler for $select .change() called.");
+                var option=$select.val()
+
+                if(option>0){
+                    var db=$("#node-input-select option:selected").text()
+                    //console.log("selected "+option+" "+db)
+
+                    //console.log(objectTree)
+                    structObj=objectTree[db]
+                    var structList=Object.keys(structObj)
+                    //console.log(structList)
+                    var val,selector
+
+                    $rulecontainer.empty()
+                    $select2.empty().append($('<option>').val(0).text("Select STRUCT"))
+                    structList.forEach((key,index)=>{
+
+                        selector=index+1
+                        val=structObj[key]
+                        $option=$('<option>').val(selector).text(key)
+                        $select2.append($option)
+
+                        $select2.width("auto")
+                        //$("option",$select2).width("auto")
+
+                        //console.log(selector+" "+key+" "+val)
+                    })
+                }else{
+                    //console.log("selected "+option)
+
+                }
+            })
+
+            
+            $rulecontainer=$("#node-input-rule-container")
+
+            $select2.change(function() {
+                //alert( "Handler for $select2 .change() called.");
+                var option=$select2.val()
+
+                if(option>0){
+                    var struct=$("#node-input-select2 option:selected").text()
+                    varObj=structObj[struct]
+                    //console.log("selected "+option+" "+struct)
+                    //console.log(varObj)
+                    //console.log(objectTree)
+                    //var variablesArray=structObj[struct]['variables']
+                    //console.log(variablesArray)
+                    
+                    var varList=Object.keys(varObj)
+
+                    var variableObj={}
+
+                    $rulecontainer.empty()
+
+                    varList.forEach((key,index)=>{
+
+                        //console.log(index+" "+key)
+                        variableObj=varObj[key]
+                        variableObj['name']=key
+                        //console.log(variableObj)
+
+                        $("#node-input-rule-container").editableList('addItem',variableObj);
+                    })
+                }else{
+                    //console.log("selected "+option)
+                }
+            })
+
+
+            $("#node-input-typedInputJSON").typedInput({
+                type:"json",
+                types:["json"]
+            }); 
+
+            function resizeRule(rule) {
+                var newWidth = rule.width();
+                var selectField = rule.find("select");
+                var type = selectField.val()||"";
+                var valueField = rule.find(".node-input-rule-value");
+                var typeField = rule.find(".node-input-rule-type-value");
+                var numField = rule.find(".node-input-rule-num-value");
+                var expField = rule.find(".node-input-rule-exp-value");
+                var keyField = rule.find(".node-input-rule-key-value");
+                var btwnField1 = rule.find(".node-input-rule-btwn-value");
+                var btwnField2 = rule.find(".node-input-rule-btwn-value2");
+                var selectWidth;
+                if (type.length < 4) {
+                    selectWidth = 60;
+                } else if (type === "regex") {
+                    selectWidth = 147;
+                } else {
+                    selectWidth = 120;
+                }
+                selectField.width(selectWidth);
+                if ((type === "btwn") || (type === "index")) {
+                    btwnField1.typedInput("width",(newWidth-selectWidth-70));
+                    btwnField2.typedInput("width",(newWidth-selectWidth-70));
+                } else if ((type === "head") || (type === "tail")) {
+                    numField.typedInput("width",(newWidth-selectWidth-70));
+                } else if (type === "jsonata_exp") {
+                    expField.typedInput("width",(newWidth-selectWidth-70));
+                } else if (type === "istype") {
+                    typeField.typedInput("width",(newWidth-selectWidth-70));
+                } else {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
+                        // valueField.hide();
+                    } else {
+                        valueField.typedInput("width",(newWidth-selectWidth-70));
+                    }
+                }
+                
+            }  
+
+            
+            $rulecontainer.css('min-height','150px').css('min-width','450px').editableList({
+                removable: true,
+                addItem: function(container,i,opt) {
+                    //console.log(container)
+                    //console.log(i)
+                    //console.log(opt)
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
+                    var row = $('<div/>').appendTo(container);
+                    //var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                    var row2 = $('<div/>',{style:"padding-top: 5px;"}).appendTo(container);
+                    var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
+                    var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
+                    //var group0 = $('<optgroup/>', { label: "value rules" }).appendTo(selectField);
+                    //var group1 = $('<optgroup/>', { label: "sequence rules" }).appendTo(selectField);
+                    selectField.append($("<option></option>").val("NULL").text(""))
+                    selectField.append($("<option></option>").val("READ").text("READ"))
+                    selectField.append($("<option></option>").val("WRITE").text("WRITE"))
+                    selectField.append($("<option></option>").val("SET").text("SET"))
+
+
+                    function createTextField(){
+                        return $('<input/>',{type:"text",name:"variable",value:""}).appendTo(row)
+                    }
+                    function createValueField(){
+                        return $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"})
+                        .appendTo(row2).typedInput({default:'str',types: ["str"]});
+                    }
+                    function createTypeField(){
+                        return $('<input/>',{type:"text",name:"type",value:""}).appendTo(row2)
+                    }
+
+                    var name=opt['name']
+                    var type=opt['type']
+                    var value=opt['value']
+
+                    var $textField=createTextField()
+                    $textField.val(name).attr("readonly",true)//.width((($textField.val().length + 1) * 8) + 'px')
+
+
+                    valueField=createValueField();
+                    valueField.typedInput('value',value);
+                    valueField.typedInput('show').width('auto');
+
+                    $typeField=createTypeField()
+                    $typeField.val(type).attr("readonly",true).width('auto')
+
+
+                    //resizeRule(container);
+                    $(container).width("auto")
+                    $rulecontainer.parent().height($rulecontainer.height())
+                }
+
+                
+            });
+
+            function selectOption($select,name,triggerChange){
+                var $option=$('option',$select).removeAttr('selected')
+                .filter(function( id,elem ) {
+                    var text=$(elem).text();
+                    //console.log(text+" "+name);
+                    if(text==name){
+                        console.log("option found")
+                        return true
+                    }; 
+                })
+                $option.prop('selected','selected')//.change()
+                if(triggerChange)  $option.change()
+            }; 
+            
+            function setEditableListValues(storedRules){
+
+                var rules = $("#node-input-rule-container").editableList('items');
+                //node.rules = [];
+
+                if(rules.length>0){
+                
+                    rules.each(function(i) {
+                        //console.log(this)
+
+                        var rule=this
+
+                        var name = rule.find("[name=variable]").val()
+                        //console.log("text: "+name)
+
+                        if(storedRules.rules.hasOwnProperty(name)){
+                            console.log("stored rule exists")
+
+                            var action = rule.find("select").val();
+                            var storedAction = storedRules.rules[name].action
+                            console.log("setting action: "+action+" to "+storedAction)
+                            rule.find("select").val(storedAction);
+
+                            var value = rule.find(".node-input-rule-value").val()
+                            var storedValue = storedRules.rules[name].value
+                            console.log("setting value: "+value+" to "+storedValue)
+                            rule.find(".node-input-rule-value").typedInput('value',storedValue)
+
+                            var type = rule.find("[name=type]").val()
+                            console.log("type: "+type)
+
+
+                        };
+                    })
+                }
+            }
+
+        },
+
+        oneditsave: function(){
+            function storeEditableList(node) {
+                var db=$("#node-input-select option:selected").text()
+                var struct=$("#node-input-select2 option:selected").text()
+
+                //var node = this;
+                //node.editableList={'db':db,'struct':struct,'rules':[]}
+                node.editableList={'db':db,'struct':struct,'rules':{}}
+                node.orderedList=[]
+                var rules = $("#node-input-rule-container").editableList('items');
+                
+                //node.rules = [];
+                if(rules.length>0){
+                
+                    rules.each(function(i) {
+                        //console.log(this)
+
+                        var rule=this
+
+                        var varData = $(this).data('data');
+                        //console.log(varData)
+
+                        var name = rule.find("[name=variable]").val()
+                        //console.log("text: "+name)
+
+                        var value = rule.find(".node-input-rule-value").val()
+                        //console.log("value: "+value)
+
+                        var type = rule.find("[name=type]").val()
+                        //console.log("type: "+type)
+
+                        var action = rule.find("select").val();
+                        //console.log("action: "+action)
+
+                        if(action!=='NULL'){
+                            node.editableList.rules[name]={'action':action,'type':type,'value':value}
+                            node.orderedList.push({'action':action,'name':name,'value':value})
+                        }
+                        
+                    })
+                }else{
+                    node.editableList={}
+                }
+                console.log(node)
+                var $typedInputJSON=$("#node-input-typedInputJSON")
+                $typedInputJSON.typedInput('value',JSON.stringify(node.editableList.rules));
+            };
+            
+            storeEditableList(this)
+        
+        },
+    });
+
+
+</script>
+
+<script type="text/html" data-help-name="lower-case">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>

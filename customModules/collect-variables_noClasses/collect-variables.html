@@ -1,0 +1,92 @@
+<script type="text/html" data-template-name="collect-variables">
+    <div class="form-row">
+        <label for="node-input-varfile"><i class="fa fa-tag"></i> ConfigFile</label>
+        <input type="text" id="node-input-varfile" placeholder="File">
+    </div>
+    <div class="form-row">
+        <label for="node-input-typedInputJSON"><i class="fa fa-tag"></i> OPC Variables</label>
+        <input type="text" id="node-input-typedInputJSON">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('collect-variables',{
+        category: 'custom',
+        color: '#a6bbcf',
+        defaults: {
+            varfile: {value:""},
+            typedInputJSON: {value:{}},
+        },
+        inputs:1,
+        outputs:2,
+        icon: "file.png",
+        label: function() {
+            return this.varfile||"collect-variables";
+        },
+        button: {
+            enabled: function() {
+                // return whether or not the button is enabled, based on the current
+                // configuration of the node
+                return !this.changed
+            },
+            visible: function() {
+                // return whether or not the button is visible, based on the current
+                // configuration of the node
+                return this.hasButton
+            },
+            onclick: function() { 
+                console.log("button clickkkkk");
+/*
+                $.get( "/getVariables", function( data ) {
+                    console.log(data);
+                    alert( "setVariables executedddddddddddd" );
+                });
+*/
+                $.ajax({
+                    url: '/setOPC',
+                    type: 'PUT',
+                    success: function(result) {
+                        console.log(result);
+                        alert( "setOPC executedddddddddddd" );
+                    }
+                });
+            }
+        },
+        oneditprepare: function(){
+            alert("Hello! I am preparing edit template!!");
+
+            console.log(this.varfile);
+            console.log(this.typedInputJSON);
+
+            var getData = new Promise((resolve,reject)=>{
+                $.get( "/getVariables", function( data ) {
+                    resolve(data)
+                })
+            });
+
+            var $typedInputJSON=$("#node-input-typedInputJSON")
+            $typedInputJSON.typedInput({
+                type:"json",
+                types:["json"]
+            }); 
+
+            getData.then((data)=>{
+
+                console.log(data);
+                $typedInputJSON.typedInput('value',JSON.stringify(data));
+                alert( "Variables Loaded" );             
+            })      
+
+        },
+
+        oneditsave: function(){
+         
+        },
+    });
+
+
+</script>
+
+<script type="text/html" data-help-name="lower-case">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>

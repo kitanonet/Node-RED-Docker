@@ -1,0 +1,91 @@
+<script type="text/html" data-template-name="test-node">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-newproperty"><i class="fa fa-tag"></i> Newproperty</label>
+        <input type="text" id="node-input-newproperty" placeholder="Newproperty">
+    </div>
+    <div class="form-row">
+        <label for="node-input-typedInputJSON"><i class="fa fa-tag"></i> JSONproperty</label>
+        <input type="text" id="node-input-typedInputJSON">
+    </div>
+    <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-input-select"><i class="fa fa-calculator"></i> Select</label>
+        <select id="node-input-select">
+            <option>1</option>
+            <option>2</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('test-node',{
+        category: 'custom',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:""},
+            newproperty: {value:"newproperty"},
+            typedInputJSON: {value:{}},
+            editableList: {value:[]},
+            select: {value:""},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name||"test-node";
+        },
+        oneditprepare: function(){
+            alert("Hello! I am preparing edit template!!");
+
+            $.get( "/config", function( data ) {
+                console.log(data);
+                
+                alert( "Load was performed." );
+            });
+
+
+            $("#node-input-typedInputJSON").typedInput({
+                type:"json",
+                types:["json"]
+            }); 
+
+            $("#node-input-rule-container").css('min-height','150px').css('min-width','450px').editableList({
+                addItem: function(container,i,opt) {
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
+                    var row = $('<div/>').appendTo(container);
+                    var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                    var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
+                    var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
+                    
+                }
+            });
+
+            $("#node-input-select").append($('<option>').val(3).text("optionText"))
+
+        },
+
+        oneditsave: function() {
+            var rules = $("#node-input-rule-container").editableList('items');
+            var node = this;
+            node.rules = [];
+            rules.each(function(i) {
+                var ruleData = $(this).data('data');
+                var rule = $(this);
+                var type = rule.find("select").val();
+            })
+        },
+    });
+</script>
+
+<script type="text/html" data-help-name="lower-case">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>
