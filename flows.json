@@ -1523,7 +1523,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Action Collector",
-        "func": "if(flow.get('actions')){\n    console.log('flow actions exists')\n}else{\n    console.log('flow actions not exists')\n    flow.set('actions',[])\n}\n\nvar actions=flow.get('actions')\n\nif(msg.hasOwnProperty('req')){\n    //console.log(msg.req)\n    var url=msg.req.url\n    console.log(\"http req:\\'\"+url+\"\\'\")\n    switch(url){\n        case \"/actions\":\n\n            console.log(actions)\n            msg.payload = actions\n            break\n        default:\n            msg.payload = 'no response associated with '+url\n    }\n    return msg\n}else {\n    \n    //flow.actions.push(msg.topic)\n    //flow.actions.push(msg.payload)\n    actions.push(msg)\n    console.log(actions)\n    //return msg;\n    console.log(\"msg:\")\n    console.log(JSON.stringify(msg))\n    var msg1=msg\n    console.log(\"payload of type: \"+typeof msg.payload)\n    if(typeof msg.payload == 'object'){\n    console.log(\"object payload\")   \n    }else if(typeof msg.payload == 'undefined'){\n        msg1.payload=\"READ \"+msg.topic\n    }else{\n        msg1.payload=msg.topic+\" \"+msg.payload\n    }\n    //console.log(JSON.stringify(msg1))\n    /*\n    if(msg.topic){\n        var msg1={payload:\"\"}\n        msg1.payload=msg.topic\n        node.send(msg1)\n    }\n    */\n    //node.send(msg)\n    //node.done\n    flow.set('actions',actions)\n    return msg1\n}",
+        "func": "if(flow.get('actions')){\n    console.log('flow actions exists')\n}else{\n    console.log('flow actions not exists')\n    flow.set('actions',[])\n}\n\nvar actions=flow.get('actions')\n\nif(msg.hasOwnProperty('req')){\n    //console.log(msg.req)\n    var url=msg.req.url\n    console.log(\"http req:\\'\"+url+\"\\'\")\n    switch(url){\n        case \"/actions\":\n\n            console.log(actions)\n            msg.payload = actions\n            break\n        default:\n            msg.payload = 'no response associated with '+url\n    }\n    return msg\n}else {\n    \n    //flow.actions.push(msg.topic)\n    //flow.actions.push(msg.payload)\n    actions.push(msg)\n    //console.log(actions)\n    //return msg;\n    console.log(\"msg:\")\n    console.log(JSON.stringify(msg))\n    var msg1=msg\n    console.log(\"topic of type: \"+typeof msg.topic)\n    console.log(\"payload of type: \"+typeof msg.payload)\n    if(typeof msg.payload == 'object' && typeof msg.topic != 'undefined'){\n        \n        //console.log(\"object payload\")   \n        msg1.payload=msg.topic+\" \"+JSON.stringify(msg.payload)\n        \n    }else if(typeof msg.topic != 'undefined'){\n        \n        //console.log(\"object payload\")   \n        msg1.payload=msg.topic+\" \"+msg.payload\n        \n    }else if(typeof msg.topic == 'undefined'){\n        \n        //console.log(\"undefined topic\")\n        msg1.payload=msg.payload\n        \n    }else if(typeof msg.payload == 'undefined'){\n        \n        //console.log(\"undefined payload\") \n        msg1.payload=\"READ \"+msg.topic\n        \n    }\n    //console.log(JSON.stringify(msg1))\n    /*\n    if(msg.topic){\n        var msg1={payload:\"\"}\n        msg1.payload=msg.topic\n        node.send(msg1)\n    }\n    */\n    //node.send(msg)\n    //node.done\n    flow.set('actions',actions)\n    return msg1\n}",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1534,7 +1534,7 @@
         "wires": [
             [
                 "4a13e323.2ccd4c",
-                "8c0b3ad1.429bf8"
+                "8ce0b56d.798148"
             ]
         ]
     },
@@ -2820,7 +2820,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2831,7 +2831,8 @@
         "wires": [
             [
                 "624e019b.3f388",
-                "473485f2.6f899c"
+                "473485f2.6f899c",
+                "f11416f2.b27058"
             ]
         ]
     },
@@ -2840,7 +2841,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2860,7 +2861,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2880,7 +2881,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2900,7 +2901,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2920,7 +2921,7 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Check READ Value ",
-        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={response:\"CHECK RESULT : \"+result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
+        "func": "context.data=context.data||{}\nif(msg.hasOwnProperty('payload') && !msg.hasOwnProperty('topic')){\n    console.log(\"msg0:\")\n    console.log(msg)\n    context.data.msg0=msg.payload[0].READ\n}else if(!msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic')){\n    console.log(\"msg1:\")\n    console.log(msg)\n    context.data.msg1=msg\n}else if(msg.hasOwnProperty('payload') && msg.hasOwnProperty('topic') && context.data.hasOwnProperty('msg1')){\n    if(msg.topic==context.data.msg1.topic){\n        console.log(\"msg2:\")\n        console.log(msg)\n        context.data.msg2=msg \n    }\n}\n\nif(context.data.msg0 != null && context.data.msg1 != null && context.data.msg2 != null){\n    var result=\"FAILED\"\n    if(context.data.msg0.payload == context.data.msg2.payload){\n        result=\"PASSED\"\n    }\n    var response={CHECK : result}\n//    var payload = [context.data.msg0,context.data.msg1,context.data.msg2,response]\n    var payload = {READ:context.data.msg0,REQ:context.data.msg1,RES:context.data.msg2,response}\n    context.data=null\n    return {payload:payload}\n}//else{\n//    return msg;    \n//}\n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3051,7 +3052,7 @@
         "name": "",
         "statusCode": "",
         "headers": {},
-        "x": 1290,
+        "x": 1430,
         "y": 120,
         "wires": []
     },
@@ -3068,8 +3069,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1110,
-        "y": 120,
+        "x": 1070,
+        "y": 160,
         "wires": []
     },
     {
@@ -3200,5 +3201,64 @@
                 "ad6975c9.e71a08"
             ]
         ]
+    },
+    {
+        "id": "8ce0b56d.798148",
+        "type": "switch",
+        "z": "b6a3f7dd.4c1438",
+        "name": "check if http response",
+        "property": "res",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1260,
+        "y": 120,
+        "wires": [
+            [
+                "8c0b3ad1.429bf8"
+            ]
+        ]
+    },
+    {
+        "id": "f11416f2.b27058",
+        "type": "function",
+        "z": "b6a3f7dd.4c1438",
+        "name": "Retrigger On Failed",
+        "func": "context.responses=context.responses||[]\ncontext.i=context.i||0\n\nif(msg.payload.hasOwnProperty('response')){\n    var response=msg.payload.response\n    console.log('CHECK RESPONSE')\n    console.log(response)\n    context.responses[context.i]=response\n    context.i++\n    console.log(context.responses)\n    return msg;  \n}\n\n  \n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 680,
+        "wires": [
+            [
+                "cf9651f6.746f9"
+            ]
+        ]
+    },
+    {
+        "id": "cf9651f6.746f9",
+        "type": "debug",
+        "z": "b6a3f7dd.4c1438",
+        "name": "RETRIGGER OUT",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 680,
+        "wires": []
     }
 ]
