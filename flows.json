@@ -28,6 +28,13 @@
         "info": ""
     },
     {
+        "id": "70830d1f.3a8654",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": ""
+    },
+    {
         "id": "ab20bea.b11ee4",
         "type": "OpcUa-Endpoint",
         "endpoint": "opc.tcp://localhost:4840/UA/NoderedServer",
@@ -3230,17 +3237,18 @@
         "type": "function",
         "z": "b6a3f7dd.4c1438",
         "name": "Retrigger On Failed",
-        "func": "context.responses=context.responses||[]\ncontext.i=context.i||0\n\nif(msg.payload.hasOwnProperty('response')){\n    var response=msg.payload.response\n    console.log('CHECK RESPONSE')\n    console.log(response)\n    context.responses[context.i]=response\n    context.i++\n    console.log(context.responses)\n    return msg;  \n}\n\n  \n\n",
+        "func": "context.responses=context.responses||[]\ncontext.i=context.i||0\n\nif(msg.payload.hasOwnProperty('response')){\n    var response=msg.payload.response\n    console.log('CHECK RESPONSE')\n    console.log(response)\n    context.responses[context.i]=response\n    context.i++\n    console.log(context.responses)\n    //return msg.payload.response;\n    node.send(msg.payload.response)\n    if(msg.payload.response.CHECK == 'FAILED'){\n        if(context.i<5){\n            setTimeout(()=>{\n                msg.payload.retry={retry:context.i}\n                node.send(msg.payload)\n            },5000)\n        }else if(context.i==5) context.i=0\n    }else{\n        context.i=0\n    }\n}\n\n  \n\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 670,
-        "y": 680,
+        "y": 500,
         "wires": [
             [
-                "cf9651f6.746f9"
+                "cf9651f6.746f9",
+                "e4ba72bd.ef48c"
             ]
         ]
     },
@@ -3259,6 +3267,92 @@
         "statusType": "auto",
         "x": 910,
         "y": 680,
+        "wires": []
+    },
+    {
+        "id": "e4ba72bd.ef48c",
+        "type": "switch",
+        "z": "b6a3f7dd.4c1438",
+        "name": "",
+        "property": "retry",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 830,
+        "y": 500,
+        "wires": [
+            [
+                "27f17f8f.7c043",
+                "87397e8e.6510d"
+            ]
+        ]
+    },
+    {
+        "id": "27f17f8f.7c043",
+        "type": "debug",
+        "z": "b6a3f7dd.4c1438",
+        "name": "RETRY OUT",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "8e91152f.6a8548",
+        "type": "inject",
+        "z": "70830d1f.3a8654",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 120,
+        "wires": [
+            [
+                "b8968c8d.51409"
+            ]
+        ]
+    },
+    {
+        "id": "b8968c8d.51409",
+        "type": "debug",
+        "z": "70830d1f.3a8654",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 120,
         "wires": []
     }
 ]
