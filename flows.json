@@ -65,9 +65,9 @@
         "type": "collect-variables",
         "z": "4d46ae33.cc774",
         "varfile": "${VARFILE}",
-        "typedInputJSON": "{}",
-        "x": 470,
-        "y": 140,
+        "typedInputJSON": "{\"\\\"DB_OP010A_MES_Interface_1\\\"\":{\"\\\"MES_MES_TO_PLC_Key_PartNumber\\\"\":{\"\\\"Part17\\\"\":{\"name\":\"\\\"Part17\\\"\",\"type\":\"String\",\"value\":\"\"},\"\\\"Part18\\\"\":{\"name\":\"\\\"Part18\\\"\",\"type\":\"String\",\"value\":\"\"},\"\\\"Part19\\\"\":{\"name\":\"\\\"Part19\\\"\",\"type\":\"String\",\"value\":\"\"}}}}",
+        "x": 410,
+        "y": 100,
         "wires": [
             [
                 "6cb18d45.e05db4",
@@ -840,8 +840,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 790,
-        "y": 1480,
+        "x": 870,
+        "y": 1500,
         "wires": []
     },
     {
@@ -857,7 +857,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 810,
+        "x": 890,
         "y": 1540,
         "wires": []
     },
@@ -874,8 +874,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 810,
-        "y": 1600,
+        "x": 870,
+        "y": 1580,
         "wires": []
     },
     {
@@ -1483,7 +1483,7 @@
         "name": "",
         "info": "# 1\tPALLET_IN_POS is false\n# 2\tthere is an open transit\n\n",
         "x": 80,
-        "y": 60,
+        "y": 20,
         "wires": []
     },
     {
@@ -1840,8 +1840,8 @@
         "links": [
             "88d8f709.4b4c88"
         ],
-        "x": 35,
-        "y": 100,
+        "x": 135,
+        "y": 60,
         "wires": [
             [
                 "42851990.1fa478"
@@ -3126,7 +3126,7 @@
         "topic": "",
         "payload": "",
         "payloadType": "date",
-        "x": 260,
+        "x": 280,
         "y": 40,
         "wires": [
             [
