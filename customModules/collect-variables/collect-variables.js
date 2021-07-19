@@ -31,6 +31,12 @@ class DbObject {
 	addStruct(structObject){
 		this.structMap.set(structObject.name,structObject)
 	}
+	getName(){
+		return this.name
+	}
+	getStructMap(){
+		return this.structMap
+	}
 }
 
 class StructObject {
@@ -42,6 +48,12 @@ class StructObject {
 	addVariable(opcVariable){
 		this.variableMap.set(opcVariable.name,opcVariable)
 	}
+	getName(){
+		return this.name
+	}
+	getVariableMap(){
+		return this.variableMap
+	}
 }
 
 class OpcVariable {
@@ -49,22 +61,47 @@ class OpcVariable {
         this.nodeId=element[0]
 		const nodeId_arr=element[0].split(';')
 		this.ns=nodeId_arr[0]
-		this.name=nodeId_arr[1].substr(nodeId_arr[1].indexOf("s=")+2)
+		this.variable=nodeId_arr[1].substr(nodeId_arr[1].indexOf("s=")+2)
 		this.type=element[1]
 		this.value=element[2]
 
-		const namefields=this.name.split('.')
+		const namefields=this.variable.split('.')
 		this.db=namefields[0]
 		this.struct=namefields[1]
 		const searchRegExp = /,/g;
 		const replaceWith = '.';
-		this.variable=namefields.slice(2).toString().replace(searchRegExp,replaceWith)
+		this.name=namefields.slice(2).toString().replace(searchRegExp,replaceWith)
     }
 
     // Adding a method to the constructor
     greet() {
         return `${this.name} says hello.`;
     }
+	getVariable(){
+		return this.variable
+	}
+	getType(){
+		return this.type
+	}
+	getNs(){
+		return this.ns
+	}
+	getValue(){
+		return this.value
+	}
+	getNodeId(){
+		return this.nodeId
+	}
+	getName(){
+		return this.name
+	}
+	getStruct(){
+		return this.struct
+	}
+	getDb(){
+		return this.db
+	}
+
 }
 
 const processData = (data)=>{
@@ -283,14 +320,45 @@ module.exports = function(RED) {
 				})
 */
 				msg2={}
+				var objTree={}
+				processData(data).then((dataMap)=>{
+					//console.log(dataObj)
+					//msg.payload = 
+					dataObj=Object.fromEntries(dataMap)
+					//console.log(dataObj)
+					Object.values(dataObj).forEach((dbObj)=>{
+						//dbObj=Object.fromEntries(dbMap)
+						dbName=dbObj.getName()
+						structMap=dbObj.getStructMap()
+						//console.log(dbName)
+						//console.log(structMap)
+						objTree[dbName]={}
 
-				processData(data).then((dataObj)=>{
-					console.log(dataObj)
-					msg.payload = Object.fromEntries(dataObj)
+						Object.values(Object.fromEntries(structMap)).forEach((structObj)=>{
+							structName=structObj.getName()
+							variableMap=structObj.getVariableMap()
+							//console.log(structName)
+							//console.log(variableMap)
+							objTree[dbName][structName]={}
+
+							Object.values(Object.fromEntries(variableMap)).forEach((opcVariable)=>{
+								varName=opcVariable.getName()
+								varType=opcVariable.getType()
+								varValue=opcVariable.getValue()
+								console.log(varName+" "+varType+" "+varValue)
+								objTree[dbName][structName][varName]={name:varName,type:varType,value:varValue}
+							})
+
+						})
+						
+					})
+
+					//console.log(objTree)
+					msg.payload=objTree
 					console.log(msg)
 					node.send([msg,null])
 					node.done
-					if(httpReqUrl=='/setOPC'){
+					if(typeof httpReqUrl != 'undefined' && httpReqUrl=='/setOPC'){
 						createOpcMessages(data,node).then((opcMessages)=>{
 							console.log(opcMessages)
 							msg2.opcMessages = opcMessages

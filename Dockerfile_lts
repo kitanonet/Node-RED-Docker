@@ -22,6 +22,8 @@ COPY ./package.json /data/
 
 RUN mkdir -p /data/customModules 
 COPY customModules /data/customModules
+RUN mkdir -p /data/customData
+COPY customData /data/customData
 
 USER 0
 
